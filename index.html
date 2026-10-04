@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<title>Утро на Васильевском</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prata&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+</style>
+<style>
+/* Layout: одна колонка-«лента времени» от ночи к дню; сверху настоящая карта маршрута, по точкам — что делать и как ехать дальше */
+:root{
+  --bg:#EDF0F3; --surface:#F8FAFB; --fg:#14202B; --muted:#56687A; --line:#C9D3DC;
+  --neva:#2E5C88; --spire:#B5832A; --walk:#2E5C88; --ride:#B5832A; --done:#3F7A55;
+  --f-display:"Prata", Georgia, "Times New Roman", serif;
+  --f-body:"Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#16202B; --fg:#E4EAF0; --muted:#93A3B2; --line:#283646;
+  --neva:#86AEDA; --spire:#E0B358; --walk:#86AEDA; --ride:#E0B358; --done:#7DC197; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#16202B; --fg:#E4EAF0; --muted:#93A3B2; --line:#283646;
+  --neva:#86AEDA; --spire:#E0B358; --walk:#86AEDA; --ride:#E0B358; --done:#7DC197; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:flex;flex-direction:column;gap:32px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(34px,8vw,52px);line-height:1.05}
+h2{font-size:26px;line-height:1.2}
+h3{font-size:21px;line-height:1.25}
+p{margin:0}
+a{color:var(--neva)}
+a:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--spire);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+header{display:flex;flex-direction:column;gap:12px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:15px}
+.facts b{color:var(--fg);font-weight:600}
+
+.notice{border-left:3px solid var(--spire);padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:6px;max-width:65ch}
+.notice strong{font-weight:600}
+
+figure{margin:0;display:flex;flex-direction:column;gap:10px}
+.mapwrap{position:relative;isolation:isolate;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+#map{height:min(520px,70vh);min-height:340px;width:100%;background:var(--surface)}
+.mapfail{position:absolute;inset:0;z-index:1200;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:20px;background:var(--surface);text-align:left}
+.mapfail p{max-width:48ch}
+.mapbtns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;text-decoration:none;padding:8px 14px;border-radius:6px;border:1px solid var(--neva);color:var(--neva);background:transparent}
+.btn.primary{background:var(--neva);color:var(--bg)}
+figcaption{font-size:13px;color:var(--muted);max-width:65ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:22px;height:0;border-top:3px solid var(--walk)}
+.sw.ride{border-top:3px dashed var(--ride)}
+.sw.m4{border-top:4px solid #EE7D22}
+.sw.m3{border-top:4px solid #009A49}
+.sw.m5{border-top:4px solid #702785}
+.chip.metro{color:#D86A12}
+.pin.metro{background:#D86A12}
+
+.dark-tiles .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
+.pin{width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:#2E5C88;color:#fff;display:grid;place-items:center;
+  font:500 13px/1 "IBM Plex Mono",ui-monospace,monospace;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.pin.ride{background:#B5832A}
+.leaflet-popup-content{font-family:var(--f-body);font-size:14px;line-height:1.4;margin:10px 14px}
+.leaflet-popup-content b{font-family:var(--f-mono);font-weight:500;color:#B5832A}
+
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.stop{display:grid;grid-template-columns:56px minmax(0,1fr);gap:0 14px}
+.rail{display:flex;flex-direction:column;align-items:center}
+.num{width:34px;height:34px;border-radius:50%;border:2px solid var(--neva);display:grid;place-items:center;
+  font-family:var(--f-mono);font-size:14px;color:var(--neva);background:var(--bg);flex:none;cursor:pointer}
+.stop.is-done .num{border-color:var(--done);background:var(--done);color:var(--bg)}
+.rail::after{content:"";flex:1;width:2px;background:var(--line);margin-top:4px}
+.stop:last-child .rail::after{display:none}
+.body{display:flex;flex-direction:column;gap:10px;padding-bottom:28px;min-width:0}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.time{font-family:var(--f-mono);font-size:14px;color:var(--spire)}
+.text{max-width:65ch}
+.teen{font-size:15px;max-width:65ch;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.teen b{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;display:block;margin-bottom:2px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.linkbtn{font:inherit;background:none;border:0;padding:0;color:var(--neva);text-decoration:underline;cursor:pointer}
+.check{display:inline-flex;gap:6px;align-items:center;color:var(--muted);cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--done)}
+.leg{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:14px;color:var(--muted);padding-top:2px}
+.note{font-size:14px;color:var(--muted);max-width:65ch}
+.chip{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid currentColor}
+.chip.walk{color:var(--walk)} .chip.ride{color:var(--ride)}
+
+section{display:flex;flex-direction:column;gap:14px}
+.alts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.alts li{display:flex;flex-direction:column;gap:4px;max-width:65ch;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.alts li:last-child{border-bottom:0}
+.alts .t{font-weight:600}
+.tips{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:65ch}
+.src{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.src a{color:var(--muted)}
+.reset{align-self:flex-start;font:inherit;font-size:14px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:6px 12px;cursor:pointer}
+.reset:hover{color:var(--fg);border-color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.num{transition:background .2s,border-color .2s,color .2s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Санкт-Петербург · среда, 7 октября 2026</span>
+    <h1>Утро на Васильевском</h1>
+    <p class="facts">
+      <span><b class="mono">06:00 → 12:00</b></span>
+      <span>Старт и финиш — <b>Московский вокзал</b></span>
+      <span>≈ 7 км пешком, такси и метро</span>
+    </p>
+  </header>
+
+  <div class="notice">
+    <p><strong>Что важно про эту среду.</strong> Рассвет около 07:50, так что первый час — ночной город в подсветке. Мосты к утру уже сведены. По средам закрыт сам Исаакиевский собор, но его колоннада работает — она есть в маршруте. Музеи Петропавловской крепости по средам тоже закрыты. На вокзал маршрут приводит к 11:45–11:50, чтобы спокойно забрать сумки из камеры хранения до трансфера в 12:30.</p>
+  </div>
+
+  <figure>
+    <div class="mapwrap">
+      <div id="map" aria-label="Карта маршрута по Санкт-Петербургу"></div>
+      <div class="mapfail" id="mapfail" hidden>
+        <p><strong>Карта здесь не загрузилась.</strong> Окно предпросмотра блокирует картографические сервисы. Откройте этот же файл в обычном браузере — карта появится. Или посмотрите маршрут сразу в Яндекс Картах:</p>
+        <div class="mapbtns" id="mapbtns-fail"></div>
+      </div>
+    </div>
+    <div class="legend"><span><i class="sw"></i>пешком</span><span><i class="sw ride"></i>такси или автобус</span><span><i class="sw m4"></i>4-я линия</span><span><i class="sw m5"></i>5-я линия</span><span><i class="sw m3"></i>3-я линия</span></div>
+    <div class="mapbtns" id="mapbtns"></div>
+    <figcaption>Линии на карте показывают направление, а не точный путь по улицам. Нажмите на номер точки, чтобы увидеть время. Пошаговая дорога — по кнопкам выше и ссылкам «Как добраться» у каждой точки.</figcaption>
+  </figure>
+
+  <section>
+    <h2>Маршрут</h2>
+    <ol class="timeline" id="timeline"></ol>
+    <button class="reset" id="reset" type="button">Сбросить отметки</button>
+  </section>
+
+  <section>
+    <h2>Если хочется по-другому</h2>
+    <ul class="alts">
+      <li><span class="t">Александро-Невская лавра вместо колоннады</span>
+        <span>Тихое место в 20 минутах пешком от вокзала. Территория открыта с 5:30 до 22:00, вход свободный. От «Горного института» туда идёт 4-я линия без пересадок, 5 остановок до «Площади Александра Невского».</span></li>
+      <li><span class="t">Если пойдёт дождь</span>
+        <span>Сократите прогулку по Невскому и подольше посидите на завтраке. Севкабель можно сократить до 20 минут. На колоннаде в дождь скользко и ничего не видно — тогда лучше поехать в лавру.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Перед выходом</h2>
+    <ul class="tips">
+      <li>Для метро и автобуса подойдёт банковская карта или проездной: понадобится две поездки на метро и, если без такси, одна на автобусе.</li>
+      <li>На колоннаду поднимаются только пешком, лифта нет. Билет можно купить заранее на сайте собора или в кассе на месте.</li>
+      <li>Утром у Невы ветрено и сыро: тёплая куртка, шапка, зонт.</li>
+      <li>Зарядите телефон: на Стрелке на рассвете захочется снимать.</li>
+      <li>Цены на такси смотрите в приложении перед поездкой.</li>
+      <li>Если где-то задержались, от собора до вокзала быстрее всего на такси — около 15 минут.</li>
+    </ul>
+  </section>
+
+  <section class="src">
+    <span class="eyebrow">Откуда данные о часах работы</span>
+    <a href="https://www.spbmuzei.ru/isaakievskij-sobor-czena-biletov-kak-kupit-i-rezhim-raboty" target="_blank" rel="noopener">Колоннада, выходной в третью среду — spbmuzei.ru</a>
+    <a href="https://www.spbmuzei.ru/lavra.htm" target="_blank" rel="noopener">Александро-Невская лавра — spbmuzei.ru</a>
+    <a href="https://78.ru/news/2024-12-27/stanciyu-metro-gornii-institut-otkrili-dlya-passazhirov" target="_blank" rel="noopener">Станция «Горный институт» — 78.ru</a>
+    <a href="https://spb.guide/sevkabel-port.htm" target="_blank" rel="noopener">Как добраться до Севкабеля — spb.guide</a>
+    <a href="https://t-j.ru/sevkabel-port/" target="_blank" rel="noopener">Севкабель Порт — t-j.ru</a>
+    <a href="https://www.spb-guide.ru/isaakievskij-sobor-stoimost-biletov-rezhim-raboty-kak-dobratsya.htm" target="_blank" rel="noopener">Исаакиевский собор и колоннада — spb-guide.ru</a>
+    <a href="https://triptospb.ru/peter-and-paul-fortress/" target="_blank" rel="noopener">Петропавловская крепость по средам — triptospb.ru</a>
+    <span>Часы работы проверены 5 октября 2026. Время рассвета, длительность переездов и точки станций метро на карте — оценка. Карта: © участники OpenStreetMap.</span>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const P = {
+  vokzal:[59.9298,30.3624], anichkov:[59.9331,30.3436], singer:[59.9357,30.3256], spas:[59.9401,30.3288],
+  palace:[59.9391,30.3159], strelka:[59.9443,30.3058], line67:[59.9412,30.2824], sevkabel:[59.9244,30.2414],
+  gorny:[59.9296,30.2560], teatr:[59.9255,30.2960], spasskaya:[59.9270,30.3195], admiral:[59.9362,30.3147],
+  isaac:[59.9341,30.3061], nevskyM:[59.9355,30.3270], gostiny:[59.9339,30.3330], mayak:[59.9316,30.3546]
+};
+function route(pts,mode){return "https://yandex.ru/maps/?rtext="+pts.map(k=>P[k][0]+"%2C"+P[k][1]).join("~")+"&rtt="+mode}
+function place(q){return "https://yandex.ru/maps/?text="+encodeURIComponent(q+", Санкт-Петербург")}
+
+const STOPS = [
+  {n:1,key:"vokzal",t:"06:00",name:"Московский вокзал",q:"Московский вокзал",
+   text:"Выходите на площадь Восстания и сразу идёте по Невскому в сторону Адмиралтейства. В шесть утра проспект почти пустой и подсвечен — так его мало кто видит.",
+   teen:"Обелиск посреди площади называется «Городу-герою Ленинграду». Его высота 36 метров — примерно 12-этажный дом.",
+   leg:{kind:"walk",label:"Пешком",dur:"15 мин, 1,2 км",to:"anichkov",mode:"pd"}},
+  {n:2,key:"anichkov",t:"06:15",name:"Аничков мост",q:"Аничков мост",
+   text:"Четыре бронзовые скульптуры «Укрощение коня» Петра Клодта. Обойдите все четыре: это одна история, от дикого коня до покорённого.",
+   teen:"В блокаду коней сняли и закопали в саду соседнего дворца, чтобы спасти от бомбёжек. Следы осколков на постаментах видны до сих пор.",
+   leg:{kind:"walk",label:"Пешком",dur:"15 мин, 1,1 км",to:"singer",mode:"pd"}},
+  {n:3,key:"singer",t:"06:35",name:"Дом Зингера и Казанский собор",q:"Дом Зингера",
+   text:"Два здания друг напротив друга у канала Грибоедова. Колоннада Казанского собора полукругом обнимает площадь, на куполе Дома Зингера — стеклянный глобус.",
+   teen:"В Доме Зингера много лет работал офис ВКонтакте. Хороший кадр: глобус на фоне ночного неба.",
+   leg:{kind:"walk",label:"Пешком вдоль канала",dur:"8 мин, 600 м",to:"spas",mode:"pd"}},
+  {n:4,key:"spas",t:"06:45",name:"Спас на Крови",q:"Спас на Крови",
+   text:"Самый «пряничный» храм города, с разноцветными куполами. Внутрь в такое время не попасть, но снаружи в подсветке он выглядит лучше всего.",
+   teen:"Храм построили на месте, где в 1881 году смертельно ранили императора Александра II. Внутри больше 7 тысяч квадратных метров мозаики — это площадь футбольного поля.",
+   leg:{kind:"walk",label:"Пешком через Конюшенную площадь",dur:"12 мин, 900 м",to:"palace",mode:"pd"}},
+  {n:5,key:"palace",t:"07:05",name:"Дворцовая площадь",q:"Дворцовая площадь",
+   text:"Зимний дворец, арка Главного штаба и Александровская колонна. Площадь пустая, можно пройти через арку и снять дворец в её проёме.",
+   teen:"Колонна весит около 600 тонн и ничем не закреплена — стоит под собственным весом почти 200 лет.",
+   leg:{kind:"walk",label:"Пешком через Дворцовый мост",dur:"15 мин, 1 км",to:"strelka",mode:"pd"}},
+  {n:6,key:"strelka",t:"07:30",name:"Стрелка Васильевского острова",q:"Стрелка Васильевского острова",
+   text:"Главная точка утра. Ростральные колонны, спуск к воде и вид на Петропавловскую крепость и Зимний дворец. Рассвет около 07:50 — небо над Невой начнёт светлеть раньше.",
+   teen:"Ростральные колонны раньше были маяками для кораблей. На них торчат носы кораблей — так в Древнем Риме отмечали морские победы.",
+   leg:{kind:"walk",label:"Пешком по Университетской набережной",dur:"20 мин, 1,7 км",to:"line67",mode:"pd",
+        note:"По пути пройдёте мимо Кунсткамеры, первого музея России."}},
+  {n:7,key:"line67",t:"08:10",name:"Завтрак на 6–7 линиях",q:"6-я и 7-я линии Васильевского острова",
+   text:"Пешеходная улица в центре острова, рядом метро «Василеостровская». Здесь много кафе и пекарен, большинство открывается к 8–9 утра. Время отогреться и зарядить телефон.",
+   teen:"Улицы на Васильевском называются «линиями» потому, что Пётр I хотел прорыть здесь каналы, как в Амстердаме. Каналы засыпали, а у каждой улицы остались две стороны с разными номерами.",
+   leg:{kind:"ride",label:"Такси или автобус в 09:00",dur:"10–15 мин, 3 км",to:"sevkabel",mode:"auto",alt:{label:"на автобусе",mode:"mt"}}},
+  {n:8,key:"sevkabel",t:"09:10",name:"Севкабель Порт",q:"Севкабель Порт",
+   text:"Бывший кабельный завод на берегу Финского залива. Территория открыта круглосуточно: набережная, граффити на заводских стенах, фонари из кабельных катушек и выход к морю.",
+   teen:"Самое «современное» место маршрута: тут снимают для соцсетей. Когда-то отсюда пошли первые фонари на Невском и первый телеграф в Зимнем дворце.",
+   leg:{kind:"walk",label:"Пешком до метро в 09:50",dur:"15 мин",to:"gorny",mode:"pd"}},
+  {n:9,key:"gorny",t:"10:05",name:"Метро «Горный институт»",q:"станция метро Горный институт",
+   text:"Садитесь на 4-ю, оранжевую линию и едете две остановки до «Спасской». Там переход на 5-ю, фиолетовую линию: станция «Садовая», одна остановка до «Адмиралтейской». Вместе с эскалаторами и переходом около 25 минут.",
+   teen:"«Горный институт» открыли в декабре 2024 года, он на глубине около 70 метров. А «Адмиралтейская» ещё глубже, около 86 метров: подъём там — два длинных эскалатора подряд.",
+   leg:{kind:"metro",label:"4-я линия → переход → 5-я линия",dur:"около 25 мин",to:"admiral",mode:"mt",
+        note:"От выхода «Адмиралтейской» до собора 5 минут пешком по Малой Морской улице."}},
+  {n:10,key:"isaac",t:"10:35",name:"Колоннада Исаакиевского собора",q:"Колоннада Исаакиевского собора",
+   text:"Сам собор в среду закрыт, а колоннада работает с 10:00, кроме третьей среды месяца. 43 метра пешком по лестнице и вид на весь центр.",
+   teen:"Сверху видно почти весь маршрут этого утра: Неву, Стрелку с Ростральными колоннами, Дворцовую площадь и даже Финский залив, где вы были час назад.",
+   leg:{kind:"metro",label:"В 11:20 — метро с «Невского проспекта» до «Маяковской»",dur:"около 25 мин до вокзала",to:"vokzal",mode:"mt",
+        note:"10 минут пешком до станции «Невский проспект», переход на «Гостиный двор», одна остановка по 3-й линии до «Маяковской», оттуда 5 минут до вокзала. Если не хочется метро — такси от собора около 15 минут."}},
+  {n:11,key:"vokzal",t:"≈11:45",name:"Московский вокзал — финиш",q:"Московский вокзал",
+   text:"Приходите к 11:45–11:50 — останется время забрать сумки из камеры хранения и спокойно выйти к трансферу в 12:30.",
+   teen:null, leg:null}
+];
+const LAST = 11;
+
+const ICON = {walk:"Пешком", ride:"Поездка", metro:"Метро"};
+let done = {};
+try { done = JSON.parse(localStorage.getItem("spb-route-v3") || "{}") || {}; } catch(e) { done = {}; }
+function save(){ try { localStorage.setItem("spb-route-v3", JSON.stringify(done)); } catch(e) {} }
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+
+/* Кнопки маршрута целиком */
+const WALK = ["vokzal","anichkov","singer","spas","palace","strelka","line67"];
+const btns = `<a class="btn primary" href="${route(WALK,"pd")}" target="_blank" rel="noopener">Пешая часть утра</a>
+  <a class="btn" href="${route(["sevkabel","isaac","vokzal"],"mt")}" target="_blank" rel="noopener">От Севкабеля на метро до собора и вокзала</a>`;
+document.getElementById("mapbtns").innerHTML = btns;
+document.getElementById("mapbtns-fail").innerHTML = btns;
+
+/* Лента точек */
+const ol = document.getElementById("timeline");
+STOPS.forEach(s=>{
+  const li = document.createElement("li");
+  li.className = "stop" + (done[s.n] ? " is-done" : "");
+  let leg = "";
+  if (s.leg){
+    const L = s.leg;
+    leg = `<div class="leg"><span class="chip ${L.kind}">${ICON[L.kind]}</span>
+      <span>${esc(L.label)} · <span class="mono">${esc(L.dur)}</span></span>
+      <a href="${route([s.key,L.to],L.mode)}" target="_blank" rel="noopener">Как добраться</a>
+      ${L.alt?`<a href="${route([s.key,L.to],L.alt.mode)}" target="_blank" rel="noopener">${esc(L.alt.label)}</a>`:""}
+    </div>${L.note?`<p class="note">${esc(L.note)}</p>`:""}`;
+  }
+  li.innerHTML = `
+    <div class="rail"><button class="num" type="button" aria-label="Показать точку ${s.n} на карте">${s.n===LAST?"1":s.n}</button></div>
+    <div class="body">
+      <div class="head"><span class="time">${esc(s.t)}</span><h3>${esc(s.name)}</h3></div>
+      <p class="text">${esc(s.text)}</p>
+      ${s.teen?`<p class="teen"><b>Подростку будет интересно</b>${esc(s.teen)}</p>`:""}
+      <div class="meta">
+        <button class="linkbtn" type="button" data-show="${s.n}">Показать на карте</button>
+        <a href="${place(s.q)}" target="_blank" rel="noopener">Открыть в Яндекс Картах</a>
+        <label class="check" for="done-${s.n}"><input type="checkbox" id="done-${s.n}" ${done[s.n]?"checked":""}> Были здесь</label>
+      </div>
+      ${leg}
+    </div>`;
+  li.querySelector("input").addEventListener("change", e=>{
+    done[s.n] = e.target.checked; li.classList.toggle("is-done", e.target.checked); save();
+  });
+  ol.appendChild(li);
+});
+document.getElementById("reset").addEventListener("click", ()=>{
+  done = {}; save();
+  document.querySelectorAll(".stop").forEach(li=>{li.classList.remove("is-done"); li.querySelector("input").checked=false;});
+});
+
+/* Карта */
+const fail = document.getElementById("mapfail");
+let markers = {};
+function showFail(){ fail.hidden = false; }
+if (!window.L){ showFail(); }
+else {
+  const isDark = document.documentElement.dataset.theme === "dark" ||
+    (document.documentElement.dataset.theme !== "light" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  const map = L.map("map",{scrollWheelZoom:false, zoomControl:true});
+  /* Подложка OpenStreetMap без ключа; если основной сервер не отвечает — запасной */
+  const TILE_URLS = ["https://tile.openstreetmap.org/{z}/{x}/{y}.png", "https://tile.openstreetmap.de/{z}/{x}/{y}.png"];
+  let urlIdx = 0;
+  if (isDark) document.getElementById("map").classList.add("dark-tiles");
+  const tiles = L.tileLayer(TILE_URLS[0], {maxZoom:19,
+     attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">участники OpenStreetMap</a>'}
+  ).addTo(map);
+  let loaded = 0, errors = 0;
+  tiles.on("tileload", ()=>{ loaded++; });
+  tiles.on("tileerror", ()=>{
+    errors++;
+    if (loaded === 0 && errors >= 4) {
+      if (urlIdx < TILE_URLS.length - 1) { urlIdx++; errors = 0; tiles.setUrl(TILE_URLS[urlIdx]); }
+      else showFail();
+    }
+  });
+  setTimeout(()=>{ if (loaded === 0) showFail(); }, 9000);
+
+  const walkC = isDark ? "#86AEDA" : "#2E5C88", rideC = isDark ? "#E0B358" : "#B5832A";
+  /* Пешая часть: через Дворцовый мост и по Университетской набережной */
+  const walkPath = [P.vokzal,P.anichkov,P.singer,P.spas,[59.9398,30.3205],P.palace,[59.9412,30.3086],P.strelka,[59.9416,30.3045],[59.9393,30.2950],P.line67];
+  L.polyline(walkPath,{color:walkC,weight:5,opacity:.9}).addTo(map);
+  L.polyline([P.line67,P.sevkabel],{color:rideC,weight:4,dashArray:"8 8",opacity:.95}).addTo(map);
+  L.polyline([P.sevkabel,P.gorny],{color:walkC,weight:5,opacity:.9}).addTo(map);
+  /* Метро: прямые между станциями, без точного хода тоннелей */
+  L.polyline([P.gorny,P.teatr,P.spasskaya],{color:"#EE7D22",weight:6,opacity:.9}).addTo(map);
+  L.polyline([P.spasskaya,P.admiral],{color:"#702785",weight:6,opacity:.9}).addTo(map);
+  L.polyline([P.admiral,P.isaac,P.nevskyM],{color:walkC,weight:5,opacity:.9}).addTo(map);
+  L.polyline([P.gostiny,P.mayak],{color:"#009A49",weight:6,opacity:.9}).addTo(map);
+  L.polyline([P.mayak,P.vokzal],{color:walkC,weight:5,opacity:.9}).addTo(map);
+  [["teatr","Театральная","#EE7D22"],["spasskaya","Спасская / Садовая","#EE7D22"],["admiral","Адмиралтейская","#702785"],["nevskyM","Невский проспект / Гостиный двор","#0078C9"],["mayak","Маяковская","#009A49"]].forEach(([k,name,c])=>{
+    L.circleMarker(P[k],{radius:5,color:"#fff",weight:2,fillColor:c,fillOpacity:1}).addTo(map).bindTooltip("м. "+name);
+  });
+  STOPS.filter(s=>s.n!==LAST).forEach(s=>{
+    const kind = s.n>=9 ? "metro" : (s.n===8 ? "ride" : "");
+    const icon = L.divIcon({className:"", html:`<div class="pin ${kind}">${s.n}</div>`, iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-14]});
+    const extra = s.n===1 ? "<br>Финиш здесь же, ≈11:45" : "";
+    markers[s.n] = L.marker(P[s.key],{icon, title:s.name}).addTo(map)
+      .bindPopup(`<b>${s.t}</b> ${esc(s.name)}${extra}`);
+  });
+  map.fitBounds(L.latLngBounds(Object.values(P)),{padding:[24,24]});
+
+  function focus(n){
+    const m = markers[n===LAST?1:n]; if(!m) return;
+    document.getElementById("map").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"center"});
+    map.setView(m.getLatLng(), 15); m.openPopup();
+  }
+  document.querySelectorAll("[data-show]").forEach(b=>b.addEventListener("click",()=>focus(+b.dataset.show)));
+  document.querySelectorAll(".stop .num").forEach((b,i)=>b.addEventListener("click",()=>focus(STOPS[i].n)));
+}
+</script>
+
+</body>
+</html>
